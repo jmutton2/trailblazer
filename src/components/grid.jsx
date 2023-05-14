@@ -1,16 +1,34 @@
 import React, { useEffect, useState } from "react";
+import {
+    dijkstra,
+    getNodesInShortestPathOrder,
+} from "../algorithms/dijkstra.js";
 
 import Node from "./node";
 
+let START_NODE_ROW = 10;
+let START_NODE_COL = 5;
+let FINISH_NODE_ROW = 2;
+let FINISH_NODE_COL = 47;
+
 const createNode = (col, row) => {
-    return 0;
+    return {
+        col,
+        row,
+        isStart: row === START_NODE_ROW && col === START_NODE_COL,
+        isFinish: row === FINISH_NODE_ROW && col === FINISH_NODE_COL,
+        distance: Infinity,
+        isVisited: false,
+        isWall: false,
+        previousNode: null,
+    };
 };
 
-const createEmptyGrid = () => {
+const createEmptyGrid = (rows = 20, cols = 50) => {
     const grid = [];
-    for (let row = 0; row < 20; row++) {
+    for (let row = 0; row < rows; row++) {
         const currentRow = [];
-        for (let col = 0; col < 50; col++) {
+        for (let col = 0; col < cols; col++) {
             currentRow.push(createNode(col, row));
         }
         grid.push(currentRow);
@@ -18,46 +36,138 @@ const createEmptyGrid = () => {
     return grid;
 };
 
+const addWallToGrid = (grid, row, col) => {
+    const newGrid = grid.slice();
+    const node = newGrid[row][col];
+    const newNode = {
+        ...node,
+        isWall: !node.isWall,
+    };
+    newGrid[row][col] = newNode;
+    return newGrid;
+};
+
+const animateShortestPath = (nodesInShortestPathOrder) => {
+    for (let i = 0; i < nodesInShortestPathOrder.length; i++) {
+        setTimeout(() => {
+            const node = nodesInShortestPathOrder[i];
+            document.getElementById(
+                `node-${node.row}-${node.col}`
+            ).className = `${
+                document.getElementById(`node-${node.row}-${node.col}`)
+                    .className
+            } animate-node-quickest bg-tertiary`;
+        }, 50 * i);
+    }
+};
+
+const visualizeDijkstra = (inOrderVisitedNodes, nodesInShortestPathOrder) => {
+    for (let i = 1; i < inOrderVisitedNodes.length; i++) {
+        let node = inOrderVisitedNodes[i];
+
+        if (i === inOrderVisitedNodes.length - 1) {
+            setTimeout(() => {
+                animateShortestPath(nodesInShortestPathOrder);
+            }, 10 * i);
+            return;
+        }
+
+        setTimeout(() => {
+            document.getElementById(
+                `node-${node.row}-${node.col}`
+            ).className = `${
+                document.getElementById(`node-${node.row}-${node.col}`)
+                    .className
+            } animate-node-visited bg-secondary`;
+        }, i * 9);
+    }
+};
+
+const calculateDijkstra = (matrix) => {
+    let grid = matrix;
+    let startNode = grid[START_NODE_ROW][START_NODE_COL];
+    let endNode = grid[FINISH_NODE_ROW][FINISH_NODE_COL];
+    let inOrderVisitedNodes = dijkstra(grid, startNode, endNode);
+    let nodesInShortestPathOrder = getNodesInShortestPathOrder(endNode);
+    console.log(inOrderVisitedNodes);
+    console.log(nodesInShortestPathOrder);
+    visualizeDijkstra(inOrderVisitedNodes, nodesInShortestPathOrder);
+};
+
 const Grid = () => {
     const [grid, setGrid] = useState([]);
     const [mouseDown, setMouseDown] = useState(false);
 
     const handleMouseDown = () => {
-        setMouseDown(!mouseDown);
+        setMouseDown(true);
+    };
+
+    const handleMouseUp = () => {
+        setMouseDown(false);
+    };
+
+    const handleMouseHover = (row, col) => {
+        if (!mouseDown) {
+            return;
+        }
+        setGrid(addWallToGrid(grid, row, col));
     };
 
     useEffect(() => {
-        const grid = createEmptyGrid();
+        const screenWidth = window.innerWidth;
+        const screenHeight = window.innerHeight;
+        const cols = Math.floor(screenWidth / 25); // assuming 25px width
+        const rows = Math.floor(screenHeight / 25); // assuming 25px height
+
+        START_NODE_ROW = Math.floor(rows / 2);
+        START_NODE_COL = Math.floor(cols / 5);
+        FINISH_NODE_ROW = Math.floor(rows / 2);
+        FINISH_NODE_COL = cols - START_NODE_COL;
+
+        const grid = createEmptyGrid(rows, cols);
         setGrid(grid);
     }, []);
 
     return (
-        <div className="flex flex-col justify-evenly items-center h-[90%] w-full">
-            {grid.length > 2 ? (
-                grid.map((row, rowIndex) => (
-                    <div className="flex flex-row justify-evenly items-center h-full w-full">
-                        {row.map((col, colIndex) => {
-                            console.log("here", rowIndex, colIndex);
-                            return rowIndex == 10 && colIndex == 5 ? (
-                                <Node
-                                    isWall={false}
-                                    isStart={true}
-                                    isEnd={false}
-                                    mouseDown={mouseDown}
-                                    handleMouseDown={() => handleMouseDown()}
-                                />
-                            ) : (
-                                <Node
-                                    mouseDown={mouseDown}
-                                    handleMouseDown={() => handleMouseDown()}
-                                />
-                            );
-                        })}
-                    </div>
-                ))
-            ) : (
-                <div>loading...</div>
-            )}
+        <div className="flex flex-col justify-center items-center">
+            <div className="flex flex-col justify-center h-[50px]">
+                <button
+                    onClick={() => calculateDijkstra(grid)}
+                    className="items-center h-[50px] bg-secondary hover:bg-secondary_dark text-black font-bold py-2 px-4 border-b-4 border-secondary_dark hover:border-secondary_dark rounded hover:text-white"
+                >
+                    Compute!
+                </button>
+            </div>
+
+            {/* <div className="flex flex-col justify-evenly items-center h-[100%] w-full"> */}
+            <div className="grid grid-cols-1  h-[90%] w-full p-5">
+                {grid.length > 2 ? (
+                    grid.map((row, rowIndex) => (
+                        <div className="flex flex-row justify-evenly items-center h-full w-full">
+                            {row.map((col, colIndex) => {
+                                return (
+                                    <Node
+                                        col={col.col}
+                                        row={col.row}
+                                        isWall={col.isWall}
+                                        isStart={col.isStart}
+                                        isEnd={col.isFinish}
+                                        handleMouseHover={(row, col) =>
+                                            handleMouseHover(row, col)
+                                        }
+                                        handleMouseDown={() =>
+                                            handleMouseDown()
+                                        }
+                                        handleMouseUp={() => handleMouseUp()}
+                                    />
+                                );
+                            })}
+                        </div>
+                    ))
+                ) : (
+                    <div>loading...</div>
+                )}
+            </div>
         </div>
     );
 };

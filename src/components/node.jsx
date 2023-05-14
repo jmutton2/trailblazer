@@ -1,43 +1,32 @@
 import React, { useEffect, useState } from "react";
-import "./node.css";
 
-const Node = ({ isWall, isStart, isEnd, mouseDown, handleMouseDown }) => {
-    const [colorClass, setColorClass] = useState("bg-primary");
-    const [animationClass, setAnimationClass] = useState("");
-    const [state, setState] = useState({
-        isWall: false,
-        isStart: false,
-        isEnd: false,
-    });
-
-    useEffect(() => {
-        setState({ isWall, isStart, isEnd });
-    }, []);
-
-    const handleHover = (e, clicked = false) => {
-        e.preventDefault();
-
-        if (mouseDown || clicked) {
-            if (colorClass == "bg-primary") {
-                setColorClass("bg-secondary_dark");
-                setAnimationClass("animate-node-clicked");
-            } else {
-                setColorClass("bg-primary");
-                setAnimationClass("animate-node-unclicked");
-            }
-        }
-    };
+const Node = ({
+    row,
+    col,
+    isWall,
+    isStart,
+    isEnd,
+    handleMouseHover,
+    handleMouseDown,
+    handleMouseUp,
+}) => {
+    let specialStyles = isWall
+        ? "bg-secondary_dark animate-node-clicked"
+        : isStart
+        ? "bg-start-node bg-contain bg-no-repeat bg-center"
+        : isEnd
+        ? "bg-end-node bg-contain bg-no-repeat bg-center"
+        : "";
 
     return (
         <div
-            onMouseEnter={(e) => handleHover(e)}
-            onClick={(e) => {
+            onMouseUpCapture={() => handleMouseUp()}
+            onMouseEnter={() => handleMouseHover(row, col)}
+            onMouseDownCapture={(e) => {
                 handleMouseDown(e);
-                handleHover(e, true);
             }}
-            className={`${colorClass} ${animationClass} ${
-                isStart ? "bg-tertiary opacity-[50%]" : colorClass
-            } h-[100%] w-full outline outline-[1px] outline-primary_dark inline-block`}
+            id={`node-${row}-${col}`}
+            className={`${specialStyles} h-[100%] w-full outline outline-[1px] outline-primary_dark inline-block`}
         ></div>
     );
 };
