@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from "react";
-import {
-    dijkstra,
-    getNodesInShortestPathOrder,
-} from "../algorithms/dijkstra.js";
+import { dijkstra } from "../algorithms/dijkstra.js";
+import { astar } from "../algorithms/astar.js";
+import { getNodesInShortestPathOrder } from "../algorithms/backtracking.js";
 
 import Node from "./node";
 
@@ -18,6 +17,7 @@ const createNode = (col, row) => {
         isStart: row === START_NODE_ROW && col === START_NODE_COL,
         isFinish: row === FINISH_NODE_ROW && col === FINISH_NODE_COL,
         distance: Infinity,
+        aStarDistance: Infinity,
         isVisited: false,
         isWall: false,
         previousNode: null,
@@ -61,7 +61,7 @@ const animateShortestPath = (nodesInShortestPathOrder) => {
     }
 };
 
-const visualizeDijkstra = (inOrderVisitedNodes, nodesInShortestPathOrder) => {
+const visualize = (inOrderVisitedNodes, nodesInShortestPathOrder) => {
     for (let i = 1; i < inOrderVisitedNodes.length; i++) {
         let node = inOrderVisitedNodes[i];
 
@@ -89,17 +89,27 @@ const calculateDijkstra = (matrix) => {
     let endNode = grid[FINISH_NODE_ROW][FINISH_NODE_COL];
     let inOrderVisitedNodes = dijkstra(grid, startNode, endNode);
     let nodesInShortestPathOrder = getNodesInShortestPathOrder(endNode);
-    console.log(inOrderVisitedNodes);
-    console.log(nodesInShortestPathOrder);
     visualizeDijkstra(inOrderVisitedNodes, nodesInShortestPathOrder);
+};
+
+const calculateAStar = (matrix) => {
+    let grid = matrix;
+    let startNode = grid[START_NODE_ROW][START_NODE_COL];
+    let endNode = grid[FINISH_NODE_ROW][FINISH_NODE_COL];
+    let inOrderVisitedNodes = astar(grid, startNode, endNode);
+    let nodesInShortestPathOrder = getNodesInShortestPathOrder(endNode);
+    // console.log(inOrderVisitedNodes);
+    // console.log(nodesInShortestPathOrder);
+    visualize(inOrderVisitedNodes, nodesInShortestPathOrder);
 };
 
 const Grid = () => {
     const [grid, setGrid] = useState([]);
     const [mouseDown, setMouseDown] = useState(false);
 
-    const handleMouseDown = () => {
-        setMouseDown(true);
+    const handleMouseDown = (row, col) => {
+        setGrid(addWallToGrid(grid, row, col));
+        setMouseDown(!mouseDown);
     };
 
     const handleMouseUp = () => {
@@ -131,15 +141,22 @@ const Grid = () => {
     return (
         <div className="flex flex-col justify-center items-center">
             <div className="flex flex-col justify-center h-[50px]">
-                <button
-                    onClick={() => calculateDijkstra(grid)}
-                    className="items-center h-[50px] bg-secondary hover:bg-secondary_dark text-black font-bold py-2 px-4 border-b-4 border-secondary_dark hover:border-secondary_dark rounded hover:text-white"
-                >
-                    Compute!
-                </button>
-            </div>
+                <div className="flex flex-row justify-evenly">
+                    <button
+                        onClick={() => calculateDijkstra(grid)}
+                        className="items-center h-[50px] bg-secondary hover:bg-secondary_dark text-black font-bold py-2 px-4 border-b-4 border-secondary_dark hover:border-secondary_dark rounded hover:text-white"
+                    >
+                        Compute Dijkstra!
+                    </button>
 
-            {/* <div className="flex flex-col justify-evenly items-center h-[100%] w-full"> */}
+                    <button
+                        onClick={() => calculateAStar(grid)}
+                        className="items-center h-[50px] bg-secondary hover:bg-secondary_dark text-black font-bold py-2 px-4 border-b-4 border-secondary_dark hover:border-secondary_dark rounded hover:text-white"
+                    >
+                        Compute A*!
+                    </button>
+                </div>
+            </div>
             <div className="grid grid-cols-1  h-[90%] w-full p-5">
                 {grid.length > 2 ? (
                     grid.map((row, rowIndex) => (
@@ -155,8 +172,8 @@ const Grid = () => {
                                         handleMouseHover={(row, col) =>
                                             handleMouseHover(row, col)
                                         }
-                                        handleMouseDown={() =>
-                                            handleMouseDown()
+                                        handleMouseDown={(row, col) =>
+                                            handleMouseDown(row, col)
                                         }
                                         handleMouseUp={() => handleMouseUp()}
                                     />

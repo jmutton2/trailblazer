@@ -20,10 +20,10 @@ const Node = ({
 
     return (
         <div
-            onMouseUpCapture={() => handleMouseUp()}
+            onMouseUp={() => handleMouseUp()}
             onMouseEnter={() => handleMouseHover(row, col)}
-            onMouseDownCapture={(e) => {
-                handleMouseDown(e);
+            onMouseDownCapture={() => {
+                handleMouseDown(row, col);
             }}
             id={`node-${row}-${col}`}
             className={`${specialStyles} h-[100%] w-full outline outline-[1px] outline-primary_dark inline-block`}
