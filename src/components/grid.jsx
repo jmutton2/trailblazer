@@ -89,7 +89,7 @@ const calculateDijkstra = (matrix) => {
     let endNode = grid[FINISH_NODE_ROW][FINISH_NODE_COL];
     let inOrderVisitedNodes = dijkstra(grid, startNode, endNode);
     let nodesInShortestPathOrder = getNodesInShortestPathOrder(endNode);
-    visualizeDijkstra(inOrderVisitedNodes, nodesInShortestPathOrder);
+    visualize(inOrderVisitedNodes, nodesInShortestPathOrder);
 };
 
 const calculateAStar = (matrix) => {
@@ -98,8 +98,6 @@ const calculateAStar = (matrix) => {
     let endNode = grid[FINISH_NODE_ROW][FINISH_NODE_COL];
     let inOrderVisitedNodes = astar(grid, startNode, endNode);
     let nodesInShortestPathOrder = getNodesInShortestPathOrder(endNode);
-    // console.log(inOrderVisitedNodes);
-    // console.log(nodesInShortestPathOrder);
     visualize(inOrderVisitedNodes, nodesInShortestPathOrder);
 };
 
@@ -139,9 +137,9 @@ const Grid = () => {
     }, []);
 
     return (
-        <div className="flex flex-col justify-center items-center">
+        <div className="flex flex-col justify-center items-center ">
             <div className="flex flex-col justify-center h-[50px]">
-                <div className="flex flex-row justify-evenly">
+                <div className="flex flex-row justify-between items-center">
                     <button
                         onClick={() => calculateDijkstra(grid)}
                         className="items-center h-[50px] bg-secondary hover:bg-secondary_dark text-black font-bold py-2 px-4 border-b-4 border-secondary_dark hover:border-secondary_dark rounded hover:text-white"
@@ -160,10 +158,16 @@ const Grid = () => {
             <div className="grid grid-cols-1  h-[90%] w-full p-5">
                 {grid.length > 2 ? (
                     grid.map((row, rowIndex) => (
-                        <div className="flex flex-row justify-evenly items-center h-full w-full">
+                        <div
+                            className="flex flex-row justify-evenly items-center h-full w-full"
+                            key={rowIndex}
+                        >
                             {row.map((col, colIndex) => {
                                 return (
                                     <Node
+                                        key={
+                                            "node-" + rowIndex + "-" + colIndex
+                                        }
                                         col={col.col}
                                         row={col.row}
                                         isWall={col.isWall}
