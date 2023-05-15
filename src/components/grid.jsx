@@ -121,11 +121,39 @@ const Grid = () => {
         setGrid(addWallToGrid(grid, row, col));
     };
 
+    const clearBoard = () => {
+        const screenWidth = window.innerWidth;
+        const screenHeight = window.innerHeight;
+        const cols = Math.floor(screenWidth / 40); // assuming 25px width
+        const rows = Math.floor(screenHeight / 40); // assuming 25px height
+
+        START_NODE_ROW = Math.floor(rows / 2);
+        START_NODE_COL = Math.floor(cols / 5);
+        FINISH_NODE_ROW = Math.floor(rows / 2);
+        FINISH_NODE_COL = cols - START_NODE_COL;
+
+        const grid = createEmptyGrid(rows, cols);
+        setGrid(grid);
+
+        for (let i = 0; i < grid.length; i++) {
+            for (let j = 0; j < grid[i].length; j++) {
+                let node = document.getElementById(`node-${i}-${j}`).classList;
+
+                node.remove("animate-node-quickest");
+                node.remove("bg-tertiary");
+                node.remove("animate-node-visited");
+                node.remove("bg-secondary");
+                node.remove("bg-secondary_dark");
+                node.remove("animate-node-clicked");
+            }
+        }
+    };
+
     useEffect(() => {
         const screenWidth = window.innerWidth;
         const screenHeight = window.innerHeight;
-        const cols = Math.floor(screenWidth / 25); // assuming 25px width
-        const rows = Math.floor(screenHeight / 25); // assuming 25px height
+        const cols = Math.floor(screenWidth / 40); // assuming 25px width
+        const rows = Math.floor(screenHeight / 40); // assuming 25px height
 
         START_NODE_ROW = Math.floor(rows / 2);
         START_NODE_COL = Math.floor(cols / 5);
@@ -137,22 +165,33 @@ const Grid = () => {
     }, []);
 
     return (
-        <div className="flex flex-col justify-center items-center ">
-            <div className="flex flex-col justify-center h-[50px]">
-                <div className="flex flex-row justify-between items-center">
-                    <button
-                        onClick={() => calculateDijkstra(grid)}
-                        className="items-center h-[50px] bg-secondary hover:bg-secondary_dark text-black font-bold py-2 px-4 border-b-4 border-secondary_dark hover:border-secondary_dark rounded hover:text-white"
-                    >
-                        Compute Dijkstra!
-                    </button>
+        <div className="">
+            <div className="flex flex-col justify-center h-[10%] w-full">
+                <div className="flex flex-row px-10 justify-between items-center bg-secondary_dark top-0">
+                    <h1 className="flex justify-center items-center text-white bold text-[40px]">
+                        Trailblazer
+                    </h1>
+                    <div className="flex justify-between w-[50%] items-center px-20">
+                        <button
+                            onClick={() => calculateDijkstra(grid)}
+                            className="items-center h-[50px] bg-secondary hover:bg-secondary_dark text-black font-bold py-2 px-4 border-b-4 border-secondary_dark hover:border-secondary_dark rounded hover:text-white"
+                        >
+                            Compute Dijkstra!
+                        </button>
 
-                    <button
-                        onClick={() => calculateAStar(grid)}
-                        className="items-center h-[50px] bg-secondary hover:bg-secondary_dark text-black font-bold py-2 px-4 border-b-4 border-secondary_dark hover:border-secondary_dark rounded hover:text-white"
-                    >
-                        Compute A*!
-                    </button>
+                        <button
+                            onClick={() => calculateAStar(grid)}
+                            className="items-center h-[50px] bg-secondary hover:bg-secondary_dark text-black font-bold py-2 px-4 border-b-4 border-secondary_dark hover:border-secondary_dark rounded hover:text-white"
+                        >
+                            Compute A*!
+                        </button>
+                        <button
+                            onClick={() => clearBoard()}
+                            className="items-center h-[50px] bg-secondary hover:bg-secondary_dark text-black font-bold py-2 px-4 border-b-4 border-secondary_dark hover:border-secondary_dark rounded hover:text-white"
+                        >
+                            Clear Board!
+                        </button>
+                    </div>
                 </div>
             </div>
             <div className="grid grid-cols-1  h-[90%] w-full p-5">

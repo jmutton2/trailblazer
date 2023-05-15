@@ -22,7 +22,7 @@ const Node = ({
         <div
             onMouseUp={() => handleMouseUp()}
             onMouseEnter={() => handleMouseHover(row, col)}
-            onMouseDownCapture={() => {
+            onMouseDown={() => {
                 handleMouseDown(row, col);
             }}
             id={`node-${row}-${col}`}
